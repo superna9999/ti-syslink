@@ -61,6 +61,7 @@
 
 /* Linux specific header files */
 #include <linux/kernel.h>
+#include <linux/version.h>
 #include <linux/mm.h>
 #include <linux/fs.h>
 #include <asm/segment.h>
@@ -173,7 +174,11 @@ OsalKfile_open (String             fileName,
             if (   (IS_ERR (fileDesc))
                 || (fileDesc == NULL)
                 || (fileDesc->f_op == NULL)
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0))
                 || (fileDesc->f_op->read == NULL)) {
+#else
+                || (fileDesc->f_mode & FMODE_CAN_READ) == 0) {
+#endif
                 /*! @retval OSALKFILE_E_FILEOPEN Failed to open file. */
                 status = OSALKFILE_E_FILEOPEN;
                 GT_setFailureReason (curTrace,
@@ -345,8 +350,14 @@ Int OsalKfile_read(OsalKfile_Handle fileHandle, Char *buffer, UInt32 size,
             fs = get_fs ();
             set_fs (KERNEL_DS);
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0))
             bytesRead = fileObject->fileDesc->f_op->read(fileObject->fileDesc,
                     buffer, (size * count), &(fileObject->fileDesc->f_pos));
+#else
+            bytesRead = __vfs_read(fileObject->fileDesc,
+                    (__force char __user *)buffer, (size * count),
+                    &(fileObject->fileDesc->f_pos));
+#endif
             set_fs(fs);
 
             *numBytes = bytesRead;

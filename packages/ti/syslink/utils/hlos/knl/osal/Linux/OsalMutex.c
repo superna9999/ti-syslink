@@ -62,6 +62,7 @@
 
 /* Linux specific header files */
 #include <linux/kernel.h>
+#include <linux/version.h>
 #include <linux/sched.h>
 #include <linux/mutex.h>
 
@@ -84,6 +85,9 @@ typedef struct OsalMutex_Object_tag {
     wait_queue_head_t   list; /*!< thread waiting queue for this lock */
 } OsalMutex_Object;
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4,0,0))
+static atomic_t subclass = ATOMIC_INIT(0);
+#endif
 
 /* =============================================================================
  * APIs
@@ -271,6 +275,20 @@ again:
             goto again;
         }
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4,0,0))
+        if (   (mutexObj->type == OsalMutex_Type_Interruptible)) {
+            if (mutex_lock_interruptible_nested (&(mutexObj->lock), atomic_read(&subclass)) != 0) {
+                /* TBD: How can we return -ERESTARTSYS? */
+            }
+            atomic_inc (&subclass);
+        }
+        else {
+            if (mutexObj->nested == 0) {
+                mutex_lock_nested (&(mutexObj->lock), atomic_read(&subclass));
+                atomic_inc (&subclass);
+            }
+        }
+#else
         if (   (mutexObj->type == OsalMutex_Type_Interruptible)) {
             if (mutex_lock_interruptible (&(mutexObj->lock)) != 0) {
                 /* TBD: How can we return -ERESTARTSYS? */
@@ -281,6 +299,7 @@ again:
                 mutex_lock (&(mutexObj->lock));
             }
         }
+#endif
 #if !defined(SYSLINK_BUILD_OPTIMIZE)
     }
 #endif /* #if !defined(SYSLINK_BUILD_OPTIMIZE) */
@@ -338,6 +357,9 @@ OsalMutex_leave (OsalMutex_Handle mutexHandle, IArg   key)
 
         if (key == FIRST_ENTER) {
             mutex_unlock (&(mutexObj->lock));
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4,0,0))
+            atomic_dec (&subclass);
+#endif
 			/* wake up waiting threads */
             wake_up_interruptible (&(mutexObj->list));
         }

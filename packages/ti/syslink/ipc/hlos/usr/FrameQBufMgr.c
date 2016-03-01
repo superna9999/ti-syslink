@@ -3035,7 +3035,6 @@ UInt32 FrameQBufMgr_getBaseHeaderSize(UInt8 numFrameBufs)
  * @brief API to to find out the specified interface type is supported or not.
  * @param type  interface type.
  */
-inline
 Int32 FrameQBufMgr_isSupportedInterface(UInt32 type)
 {
     Int32  status = TRUE;
@@ -3058,7 +3057,6 @@ Int32 FrameQBufMgr_isSupportedInterface(UInt32 type)
  *  interface or not.
  * @param type  interface type.
  */
-inline
 Int32 FrameQBufMgr_isSupportedBufInterface(UInt32 ctrlInterfaceType,UInt32 bufType)
 {
     Int32  status = TRUE;

@@ -48,7 +48,6 @@
 
 /* OS headers */
 #include <linux/clk.h>
-#include <plat/cpu.h>
 #include <ti/syslink/Std.h>
 #include <ti/syslink/inc/ClockOps.h>
 /* Module level headers */
@@ -142,7 +141,12 @@ Void LinuxClock_put(Ptr clkHandle)
  */
 Int32 LinuxClock_enable(Ptr clkHandle)
 {
-    return (clk_enable((struct clk *)clkHandle));
+    Int32 ret;
+
+    ret = clk_prepare((struct clk *)clkHandle);
+    if (!ret)
+	    ret = clk_enable((struct clk *)clkHandle);
+    return ret;
 }
 
 /*!
@@ -156,6 +160,7 @@ Int32 LinuxClock_enable(Ptr clkHandle)
 Void LinuxClock_disable(Ptr clkHandle)
 {
     clk_disable((struct clk *)clkHandle);
+    clk_unprepare((struct clk *)clkHandle);
 }
 
 /*!

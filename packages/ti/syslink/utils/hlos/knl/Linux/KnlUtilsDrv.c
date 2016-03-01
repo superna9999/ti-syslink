@@ -504,8 +504,8 @@ __init KnlUtilsDrv_initializeModule (void)
     /* Display the version info and created date/time */
     Osal_printf ("SysLink version : %s\nSysLink module created on Date:%s Time:%s\n",
                  SYSLINK_VERSION,
-                 __DATE__,
-                 __TIME__);
+                 "Unknown",
+                 "Unknown");
 
     /* Enable/disable levels of tracing. */
     if (TRACE != NULL) {

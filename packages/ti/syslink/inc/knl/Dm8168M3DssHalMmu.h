@@ -66,8 +66,12 @@
 
 #if defined(SYSLINK_BUILDOS_LINUX)
 /*Linux specific headers*/
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0))
 #include <plat/iommu.h>
 #include <plat/iovmm.h>
+#else
+#include <linux/iommu.h>
+#endif
 #include <asm/page.h>
 #include <linux/pagemap.h>
 #include <linux/platform_device.h>

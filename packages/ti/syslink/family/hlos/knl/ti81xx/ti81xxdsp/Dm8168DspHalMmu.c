@@ -128,10 +128,12 @@ _DM8168DSP_halMmuPteSet (DM8168DSP_HalObject       * halObject,
 Int
 _DM8168DSP_badPageDump(UInt32 phyAddr, struct page *pg);
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0))
 /* IOMMU Exported function */
 extern
 void
 iopgtable_lookup_entry (struct iommu *obj, u32 da, u32 **ppgd, u32 **ppte);
+#endif /* #if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0)) */
 #endif /* #if defined(SYSLINK_BUILDOS_LINUX) */
 
 /* =============================================================================
@@ -310,11 +312,13 @@ _DM8168DSP_halMmuAddStaticEntries (DM8168DSP_HalObject * halObject,
                 staticEntry.size          = memTable[i].size;
                 staticEntry.masterPhyAddr =
                                          MASTERPHYSADDR (&memTable [i]);
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0))
                 /*TBD : elementSize, endianism, mixedSized are hard
                  *      coded now, must be configurable later*/
                 staticEntry.elementSize   = MMU_RAM_ELSZ_16;
                 staticEntry.endianism     = LITTLE_ENDIAN;
                 staticEntry.mixedSize     = MMU_TLBES;
+#endif /* #if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0)) */
                 status = _DM8168DSP_halMmuAddEntry (halObject,
                                                    &staticEntry);
                 if (status < 0) {
@@ -362,6 +366,7 @@ _DM8168DSP_halMmuEnable (DM8168DSP_HalObject * halObject,
      * memTable may also be NULL.
      */
     mmuObj = &(halObject->mmuObj);
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0))
     /* Check if dspMmuHandler is alreaday available if yes put it back and get
      * new one */
     if(mmuObj->dspMmuHandler)
@@ -370,6 +375,7 @@ _DM8168DSP_halMmuEnable (DM8168DSP_HalObject * halObject,
         mmuObj->dspMmuHandler = NULL;
     }
     mmuObj->dspMmuHandler = iommu_get("sys");
+#endif  /* #if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0)) */
 
 #if !defined(SYSLINK_BUILD_OPTIMIZE)
     if (IS_ERR(mmuObj->dspMmuHandler)) {
@@ -446,8 +452,10 @@ _DM8168DSP_halMmuDisable (DM8168DSP_HalObject * halObject)
     }
     else {
 #endif /* if !defined(SYSLINK_BUILD_OPTIMIZE) */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0))
         iommu_put(mmuObj->dspMmuHandler);
         mmuObj->dspMmuHandler = NULL;
+#endif /* #if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0))) */	
 #if !defined(SYSLINK_BUILD_OPTIMIZE)
     }
 #endif /* if !defined(SYSLINK_BUILD_OPTIMIZE) */
@@ -472,9 +480,11 @@ _DM8168DSP_halMmuAddEntry (DM8168DSP_HalObject       * halObject,
                           DM8168DSP_HalMmuEntryInfo * entry)
 {
     Int                         status = PROCESSOR_SUCCESS;
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0))
     UInt32  *                   ppgd = NULL;
     UInt32  *                   ppte = NULL;
     DM8168DSP_HalMmuEntryInfo    te;
+#endif /* #if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0)) */
     DM8168DSP_HalMmuEntryInfo    currentEntry;
     Int32                       currentEntrySize;
 
@@ -541,6 +551,7 @@ _DM8168DSP_halMmuAddEntry (DM8168DSP_HalObject       * halObject,
 
         /* DO NOT put this check under SYSLINK_BUILD_OPTIMIZE */
         if (status >= 0) {
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0))
             /* Check every page if exists */
             iopgtable_lookup_entry (halObject->mmuObj.dspMmuHandler,
                                     currentEntry.slaveVirtAddr,
@@ -570,6 +581,7 @@ _DM8168DSP_halMmuAddEntry (DM8168DSP_HalObject       * halObject,
                     status = _DM8168DSP_halMmuPteSet (halObject, &te);
                 }
             }
+#endif /* #if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0)) */
 
 #if !defined(SYSLINK_BUILD_OPTIMIZE)
             if (status < 0) {
@@ -645,11 +657,13 @@ _DM8168DSP_halMmuDeleteEntry (DM8168DSP_HalObject       * halObject,
                              DM8168DSP_HalMmuEntryInfo * entry)
 {
     Int                         status      = PROCESSOR_SUCCESS;
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0))
     UInt32 *                    iopgd       = NULL;
+    UInt32                      clearBytes = 0;
+#endif /* #if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0)) */
     UInt32                      currentEntrySize;
     DM8168DSP_HalMmuEntryInfo    currentEntry;
     DM8168DSP_HalMmuObject *     mmuObj;
-    UInt32                      clearBytes = 0;
 
     GT_2trace (curTrace, GT_ENTER, "_DM8168DSP_halMmuDeleteEntry",
                halObject, entry);
@@ -715,6 +729,7 @@ _DM8168DSP_halMmuDeleteEntry (DM8168DSP_HalObject       * halObject,
         }
         /* DO NOT put this check under SYSLINK_BUILD_OPTIMIZE */
         if (status >= 0) {
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0))
             /* Check every page if exists */
             iopgd = iopgd_offset(mmuObj->dspMmuHandler,
                                  currentEntry.slaveVirtAddr);
@@ -727,6 +742,7 @@ _DM8168DSP_halMmuDeleteEntry (DM8168DSP_HalObject       * halObject,
 
             currentEntry.slaveVirtAddr += currentEntry.size;
             currentEntrySize           -= currentEntry.size;
+#endif /* #if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0)) */
         }
     }
 
@@ -744,6 +760,7 @@ _DM8168DSP_halMmuDeleteEntry (DM8168DSP_HalObject       * halObject,
  *
  *  @sa
  */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0))
 Int
 _DM8168DSP_halMmuPteSet (DM8168DSP_HalObject *      halObject,
                         DM8168DSP_HalMmuEntryInfo* setPteInfo)
@@ -866,11 +883,13 @@ _DM8168DSP_halMmuPteSet (DM8168DSP_HalObject *      halObject,
             }
         }
     }
-#endif /* if !defined(SYSLINK_BUILD_OPTIMIZE) */
+#endif /* if defined(SYSLINK_BUILD_OPTIMIZE) */
 
 //    GT_1trace (curTrace, GT_LEAVE, "_DM8168DSP_halMmuPteSet", status);
 
     /*! @retval PROCESSOR_SUCCESS Operation completed successfully. */
     return status;
 }
+#endif /* #if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0)) */
+
 #endif /* #if defined(SYSLINK_BUILDOS_LINUX) */

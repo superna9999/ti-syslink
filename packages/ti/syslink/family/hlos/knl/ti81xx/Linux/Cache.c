@@ -87,7 +87,11 @@ Void Cache_inv(Ptr blockPtr, UInt32 byteCnt, Bits16 type, Bool wait) {
     GT_4trace (curTrace, GT_ENTER, "Cache_inv", blockPtr, byteCnt, type, wait);
 
 #ifdef USE_CACHE_VOID_ARG
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,34))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4,0,0))
+    dma_map_single(NULL, blockPtr, (size_t)byteCnt, DMA_FROM_DEVICE);
+    outer_inv_range(__pa((UInt32)blockPtr),
+                    __pa((UInt32)(blockPtr + byteCnt)) );
+#elif (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,34))
     dmac_map_area(blockPtr, (size_t)byteCnt, DMA_FROM_DEVICE);
     outer_inv_range(__pa((UInt32)blockPtr),
                     __pa((UInt32)(blockPtr + byteCnt)) );
@@ -106,7 +110,11 @@ Void Cache_wb(Ptr blockPtr, UInt32 byteCnt, Bits16 type, Bool wait) {
     GT_4trace (curTrace, GT_ENTER, "Cache_wb", blockPtr, byteCnt, type, wait);
 
 #ifdef USE_CACHE_VOID_ARG
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,34))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4,0,0))
+    dma_map_single(NULL, blockPtr, (size_t)byteCnt, DMA_TO_DEVICE);
+    outer_clean_range(__pa((UInt32)blockPtr),
+                      __pa((UInt32)(blockPtr+byteCnt)) );
+#elif (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,34))
     dmac_map_area(blockPtr, (size_t)byteCnt, DMA_TO_DEVICE);
     outer_clean_range(__pa((UInt32)blockPtr),
                       __pa((UInt32)(blockPtr+byteCnt)) );

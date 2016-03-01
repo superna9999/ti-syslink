@@ -1863,7 +1863,7 @@ getProcInfoRet:
         {
             ProcMgr_CmdArgsGetSectionInfo srcArgs;
             ProcMgr_SectionInfo           sInfo;
-            String                        sName;
+            struct filename *             sName;
 
             /* Copy the full args from user-side. */
             retVal = copy_from_user ((Ptr) &srcArgs,
@@ -1885,7 +1885,7 @@ getProcInfoRet:
                 sName = getname (srcArgs.sectionName);
                 status = ProcMgr_getSectionInfo (srcArgs.handle,
                                                  srcArgs.fileId,
-                                                 sName,
+                                                 (String)sName->name,
                                                  &sInfo);
                 putname (sName);
 #if !defined(SYSLINK_BUILD_OPTIMIZE)

@@ -305,7 +305,6 @@ UInt32 GatePeterson_getNumInstances (Void);
  *          module.
  *
  */
-inline
 Void GatePeterson_locksinit(Void);
 
 Void GatePeterson_setReserved(UInt32 lockNum);

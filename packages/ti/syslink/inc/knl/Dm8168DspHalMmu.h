@@ -66,8 +66,12 @@
 
 #if defined(SYSLINK_BUILDOS_LINUX)
 /*Linux specific headers*/
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0))
 #include <plat/iommu.h>
 #include <plat/iovmm.h>
+#else
+#include <linux/iommu.h>
+#endif
 #include <asm/page.h>
 #include <linux/pagemap.h>
 #include <linux/platform_device.h>
@@ -244,7 +248,11 @@ typedef struct DM8168DSP_HalMmuObject_tag {
 #if defined(SYSLINK_BUILDOS_LINUX)
     struct platform_device iva2Device;
     /*!< Pltdorm device defined for iva2 sub system. */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0))
     struct iommu *         dspMmuHandler;
+#else
+    struct iommu_domain *  dspMmuHandler;
+#endif /* #if defined(CONFIG_IOMMU_API) */
     /*!< Mmu handle returned by iommu_get. */
 #endif /* #if defined(SYSLINK_BUILDOS_LINUX) */
 } DM8168DSP_HalMmuObject;

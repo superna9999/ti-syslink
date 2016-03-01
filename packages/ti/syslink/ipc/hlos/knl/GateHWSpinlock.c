@@ -244,6 +244,8 @@ Int32 GateHWSpinlock_setup(const GateHWSpinlock_Config *cfg)
         goto leave;
     }
 
+    Gate_leaveSystem (key);
+
     /* save given config or use default config */
     if (cfg != NULL) {
         Memory_copy((Ptr)&GateHWSpinlock_module->cfg, (Ptr)cfg,
@@ -262,8 +264,6 @@ Int32 GateHWSpinlock_setup(const GateHWSpinlock_Config *cfg)
     reservedSize = (cfg->numLocks/32) + (cfg->numLocks % 32 ? 1 : 0);
     GateHWSpinlock_module->reservedMaskArr = Memory_calloc(NULL,
         reservedSize * sizeof(UInt32), 0u, NULL);
-
-    Gate_leaveSystem (key);
 
 leave:
     GT_1trace(curTrace, GT_LEAVE, "GateHWSpinlock_setup: [0x%08x]", status);

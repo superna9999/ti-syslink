@@ -289,6 +289,7 @@ _DM8168VIDEOM3_halMmuAddStaticEntries (DM8168VIDEOM3_HalObject * halObject,
                                   UInt32               numMemEntries,
                                   ProcMgr_AddrInfo *   memTable)
 {
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0))
     Int                           status    = PROCESSOR_SUCCESS;
     DM8168VIDEOM3_HalMmuEntryInfo      staticEntry;
     UInt32                        i;
@@ -334,6 +335,9 @@ _DM8168VIDEOM3_halMmuAddStaticEntries (DM8168VIDEOM3_HalObject * halObject,
 
     /*! @retval PROCESSOR_SUCCESS Operation completed successfully. */
     return status ;
+#else
+    return 0;
+#endif
 }
 Int
 _DM8168VIDEOM3_halMmuEnable (DM8168VIDEOM3_HalObject * halObject,
@@ -356,10 +360,14 @@ _DM8168VIDEOM3_halMmuEnable (DM8168VIDEOM3_HalObject * halObject,
      * new one */
     if(mmuObj->videoMmuHandler)
     {
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0))
         iommu_put(mmuObj->videoMmuHandler);
+#endif
         mmuObj->videoMmuHandler = NULL;
     }
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0))
     mmuObj->videoMmuHandler = iommu_get("ducati");
+#endif
 #if !defined(SYSLINK_BUILD_OPTIMIZE)
     if (IS_ERR(mmuObj->videoMmuHandler)) {
         /*! @retval PROCESSOR_E_FAIL Failed at iommu_get. */
@@ -435,7 +443,9 @@ _DM8168VIDEOM3_halMmuDisable (DM8168VIDEOM3_HalObject * halObject)
     }
     else {
 #endif /* if !defined(SYSLINK_BUILD_OPTIMIZE) */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0))
         iommu_put(mmuObj->videoMmuHandler);
+#endif
         mmuObj->videoMmuHandler = NULL;
 #if !defined(SYSLINK_BUILD_OPTIMIZE)
     }
@@ -460,6 +470,7 @@ Int
 _DM8168VIDEOM3_halMmuAddEntry (DM8168VIDEOM3_HalObject       * halObject,
                           DM8168VIDEOM3_HalMmuEntryInfo * entry)
 {
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0))
     Int                         status = PROCESSOR_SUCCESS;
     UInt32  *                   ppgd = NULL;
     UInt32  *                   ppte = NULL;
@@ -585,6 +596,9 @@ _DM8168VIDEOM3_halMmuAddEntry (DM8168VIDEOM3_HalObject       * halObject,
 
     /*! @retval PROCESSOR_SUCCESS Operation completed successfully. */
     return status;
+#else
+    return 0;
+#endif
 }
 
 
@@ -633,6 +647,7 @@ Int
 _DM8168VIDEOM3_halMmuDeleteEntry (DM8168VIDEOM3_HalObject       * halObject,
                              DM8168VIDEOM3_HalMmuEntryInfo * entry)
 {
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0))
     Int                         status      = PROCESSOR_SUCCESS;
     UInt32 *                    iopgd       = NULL;
     UInt32                      currentEntrySize;
@@ -723,6 +738,9 @@ _DM8168VIDEOM3_halMmuDeleteEntry (DM8168VIDEOM3_HalObject       * halObject,
 
     /*! @retval PROCESSOR_SUCCESS Operation completed successfully. */
     return status;
+#else
+    return 0;
+#endif
 }
 
 
@@ -737,6 +755,7 @@ Int
 _DM8168VIDEOM3_halMmuPteSet (DM8168VIDEOM3_HalObject *      halObject,
                         DM8168VIDEOM3_HalMmuEntryInfo* setPteInfo)
 {
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0))
     DM8168VIDEOM3_HalMmuObject *     mmuObj;
     struct iotlb_entry tlb_entry;
     Int    status = PROCESSOR_SUCCESS;
@@ -864,5 +883,8 @@ _DM8168VIDEOM3_halMmuPteSet (DM8168VIDEOM3_HalObject *      halObject,
 
     /*! @retval PROCESSOR_SUCCESS Operation completed successfully. */
     return status;
+#else
+    return 0;
+#endif
 }
 #endif /* #if defined(SYSLINK_BUILDOS_LINUX) */

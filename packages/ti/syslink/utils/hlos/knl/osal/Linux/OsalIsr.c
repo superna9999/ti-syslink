@@ -62,7 +62,9 @@
 #include <ti/syslink/utils/Memory.h>
 
 /* Linux specific header files */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0))
 #include <asm/system.h>
+#endif
 #include <linux/interrupt.h>
 #include <linux/kthread.h>
 #include <linux/completion.h>

@@ -301,6 +301,8 @@ Int32 GateMP_setup(const GateMP_Config *cfg)
         goto leave;
     }
 
+    Gate_leaveSystem(key);
+
     /* save given config or use default config */
     if (cfg != NULL) {
         Memory_copy((Ptr)&GateMP_module->cfg, (Ptr)cfg, sizeof(GateMP_Config));
@@ -458,8 +460,6 @@ Int32 GateMP_setup(const GateMP_Config *cfg)
             GateMutex_delete((GateMutex_Handle *)&GateMP_module->gateMutex);
         }
     }
-
-    Gate_leaveSystem(key);
 
 leave:
     GT_1trace(curTrace, GT_LEAVE, "GateMP_setup: [0x%08x]", status);

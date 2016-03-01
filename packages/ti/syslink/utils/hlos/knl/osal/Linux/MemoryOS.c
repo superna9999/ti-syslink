@@ -493,7 +493,7 @@ MemoryOS_map (Memory_MapInfo * mapInfo)
         if (!exists) {
             mapInfo->dst = 0;
             if (mapInfo->isCached == TRUE) {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,34)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,34)) && (LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0))
                 mapInfo->dst = (UInt32)ioremap_cached(
                     (dma_addr_t)(mapInfo->src), mapInfo->size);
 #else
